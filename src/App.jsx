@@ -9,8 +9,9 @@ import { FaMoon } from 'react-icons/fa';
 import { IoIosSunny } from 'react-icons/io';
 import styled, { ThemeProvider } from 'styled-components';
 import GlobalStyle from './styled/GlobalStyle';
-import AddBoardPage from './pages/addBoardPage';
+import AddBoardPage from './pages/AddBoardPage';
 import ErrorPage from './pages/ErrorPage';
+import PostDetailPage from './pages/PostDetailPage';
 
 const Nav = styled.nav`
   display: flex;
@@ -101,6 +102,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/enroll" element={<EnrollPage />} />
             <Route path="/addBoard" element={<AddBoardPage />} />
+            <Route path="/detail/:postId" element={<PostDetailPage />} />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </BrowserRouter>

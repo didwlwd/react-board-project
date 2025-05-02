@@ -11,7 +11,8 @@ const GlobalStyle = createGlobalStyle`
         padding: 0;
         background-color: white;
         color: black;
-        transition:  0.3s;
+        transition: all 0.3s;
+        height: 100%;
     }
 
     a{
