@@ -4,7 +4,7 @@ import { create } from 'zustand';
 const usepostStore = create((set) => ({
   posts: [],
   loading: false,
-  error: null,
+  error: "null",
 
   getPost: async () => {
     set({ loading: true, error: null });

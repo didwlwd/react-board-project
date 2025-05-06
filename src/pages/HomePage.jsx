@@ -32,7 +32,12 @@ const All = styled.div`
   width: 600px;
 `;
 
-const HomePage = () => {
+const Error = styled.div`
+  font-size: 30px;
+  font-weight: 700;
+`;
+
+const HomePage = ({ userState }) => {
   const navigater = useNavigate();
   const { posts, getPost, loading, error } = usepostStore();
 
@@ -45,17 +50,18 @@ const HomePage = () => {
   }, [getPost]);
 
   if (loading && posts.length === 0) return Loader();
-  if (error) return <div>에러 발생 : {error.message}</div>;
+  if (error) return <Error>{error}</Error>;
+
   return (
     <>
       <All>
         <PostHeader>
           <div></div>
           <h2>게시글 목록</h2>
-          <AddPost onClick={() => navigater('/addBoard')}>게시글 작성</AddPost>
+          {userState.id === '' ? <div></div> : <AddPost onClick={() => navigater('/addBoard')}>게시글 작성</AddPost>}
         </PostHeader>
 
-        <PostList posts={posts} />
+        <PostList posts={posts} userState={userState} />
       </All>
     </>
   );

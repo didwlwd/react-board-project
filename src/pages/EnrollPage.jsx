@@ -1,14 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Main = styled.form`
   margin: 100px auto;
+  margin-bottom: 0;
   background-color: #dfdfdf;
   border-radius: 15px;
   min-width: 400px;
   width: 600px;
   padding: 20px;
+  box-shadow: 2px 3px 2px #acabab;
 `;
 
 const LoginTitle = styled.p`
@@ -123,39 +125,107 @@ const FooterButton = styled(Link)`
     color: black;
   }
 `;
-const EnrollPage = () => {
+
+const IdCheck = styled.span`
+  font-size: 16px;
+  font-weight: 700;
+  color: red;
+`;
+
+const EnrollPage = ({ users, getUsers, enrollUser }) => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    getUsers();
+  }, []);
+
+  const [formData, setFormData] = useState({
+    id: '',
+    userId: '',
+    password: '',
+    email: '',
+    userName: '',
+    userNikName: '',
+    userThumbnail: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
+
+    await enrollUser(users, formData);
+    navigate('/');
+  };
+
   return (
-    <Main>
+    <Main onSubmit={handleSubmit}>
       <LoginTitle>회원가입</LoginTitle>
       <TextArea>
         <Area>
           <InnerId>
             <InnerLable>아이디</InnerLable>
-            <InnerInput type="text" placeholder="아이디를 입력해주세요." />
+            <InnerInput
+              type="text"
+              name="userId"
+              value={formData.userId}
+              onChange={handleChange}
+              placeholder="아이디를 입력해주세요."
+            />
           </InnerId>
         </Area>
+
         <Area>
           <InnerPassword>
             <InnerLable>비밀번호</InnerLable>
-            <InnerInput type="password" placeholder="비밀번호를 입력해주세요." />
+            <InnerInput
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="비밀번호를 입력해주세요."
+            />
           </InnerPassword>
         </Area>
         <Area>
           <EmailInner>
             <InnerLable>이메일</InnerLable>
-            <InnerInput type="email" placeholder="이메일을 입력해주세요." />
+            <InnerInput
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="이메일을 입력해주세요."
+            />
           </EmailInner>
         </Area>
         <Area>
           <NameInner>
             <InnerLable>이름</InnerLable>
-            <InnerInput type="text" placeholder="이름을 입력해주세요." />
+            <InnerInput
+              type="text"
+              name="userName"
+              value={formData.userName}
+              onChange={handleChange}
+              placeholder="이름을 입력해주세요."
+            />
           </NameInner>
         </Area>
         <Area>
           <NikName>
             <InnerLable>닉네임</InnerLable>
-            <InnerInput type="text" placeholder="사용하실 닉네임을 입력해주세요." />
+            <InnerInput
+              type="text"
+              name="userNikName"
+              value={formData.userNikName}
+              onChange={handleChange}
+              placeholder="사용하실 닉네임을 입력해주세요."
+            />
           </NikName>
         </Area>
       </TextArea>

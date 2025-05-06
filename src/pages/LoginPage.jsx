@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import UserStore from '../store/UserStore';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Main = styled.form`
   margin: 100px auto;
@@ -10,6 +12,7 @@ const Main = styled.form`
   min-width: 400px;
   width: 600px;
   padding: 20px;
+  box-shadow: 2px 3px 2px #acabab;
 `;
 
 const LoginTitle = styled.p`
@@ -102,8 +105,12 @@ const FooterButton = styled(Link)`
   }
 `;
 
-const LoginPage = () => {
-  const { users, getUsers } = UserStore();
+const Futer = styled.span`
+  color: green;
+`;
+
+const LoginPage = ({ users, getUsers, checkUser, loginState }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userId: '',
     password: '',
@@ -111,11 +118,87 @@ const LoginPage = () => {
 
   useEffect(() => {
     getUsers();
-  }, [getUsers]);
+  }, []);
+
+  useEffect(() => {
+    if (loginState === true) {
+      navigate('/');
+    }
+  }, [loginState]);
 
   const handleLogin = (e) => {
     e.preventDefault();
+
     const user = users.find((use) => use.userId === formData.userId);
+
+    if (!user) {
+      toast.error('유저를 찾을 수 없습니다.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
+      return;
+    }
+
+    if (formData.password.length < 4) {
+      toast.error('비밀번호는 4자리 이상이여야 합니다.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
+      return;
+    }
+
+    if (formData.userId === '' || formData.password === '') {
+      toast.error('아이디와 비밀번호를 입력하셔야합니다.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
+      return;
+    }
+
+    if (user.password !== formData.password) {
+      toast.error('비밀번호가 다르거나 잘못입력하셨습니다.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      });
+      return;
+    }
+
+    const result = checkUser(users, formData);
+
+    if (result) {
+      alert('로그인 성공');
+      navigate('/');
+    } else {
+      alert('로그인 실패');
+    }
   };
 
   const handleChange = (ev) => {
@@ -128,13 +211,15 @@ const LoginPage = () => {
 
   return (
     <>
+      <ToastContainer />
       <Main onSubmit={handleLogin}>
         <LoginTitle>로그인</LoginTitle>
         <TextArea>
           <IdAear>
             <InnerId>
-              <InnerLable>아이디</InnerLable>
+              <InnerLable htmlFor="userId">아이디</InnerLable>
               <InnerInput
+                id="userId"
                 type="text"
                 name="userId"
                 value={formData.userId}
@@ -143,10 +228,12 @@ const LoginPage = () => {
               />
             </InnerId>
           </IdAear>
+          {formData.userId === '' ? <Futer>아이디를 입력해주셔야합니다.</Futer> : ''}
           <PasswordArea>
             <InnerPassword>
-              <InnerLable>비밀번호</InnerLable>
+              <InnerLable htmlFor="password">비밀번호</InnerLable>
               <InnerInput
+                id="password"
                 type="password"
                 name="password"
                 value={formData.password}

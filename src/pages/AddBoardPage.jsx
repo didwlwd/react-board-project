@@ -7,6 +7,7 @@ const Form = styled.form`
   padding: 15px 10px;
   border-radius: 12px;
   background-color: #f5f5f5;
+  box-shadow: 2px 3px 2px #acabab;
 `;
 
 const ImageArea = styled.div`

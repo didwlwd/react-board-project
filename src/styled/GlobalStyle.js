@@ -8,7 +8,7 @@ const GlobalStyle = createGlobalStyle`
     body{
         font-family :"Noto Sans", sans-serif;
         margin: 0;
-        padding: 0;
+        padding: 0 0 50px 0;
         background-color: white;
         color: black;
         transition: all 0.3s;
