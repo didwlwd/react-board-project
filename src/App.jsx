@@ -153,6 +153,10 @@ function App() {
       UserStore();
     const navigate = useNavigate();
 
+    useEffect(() => {
+      getUsers();
+    }, []);
+
     const handleLogOut = () => {
       logOut();
       navigate('/');
@@ -161,10 +165,7 @@ function App() {
       <>
         <Nav>
           <HeaderDiv>
-            <Title>
-              <SlAnchor />
-              블로그
-            </Title>
+            <Title>블로그</Title>
             <StyledLink to="/">홈</StyledLink>
           </HeaderDiv>
           <HeaderDiv>
