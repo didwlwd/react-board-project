@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import UserStore from '../store/UserStore';
 
 const Form = styled.form`
   margin: 50px auto;
@@ -95,7 +96,8 @@ const UserNikName = styled.span`
   text-align: center;
 `;
 
-const UserDetailPage = ({ userState, deleteUser, updateUser, getUsers }) => {
+const UserDetailPage = () => {
+  const { userState, updateUser, deleteUser, getUser } = UserStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,14 +107,12 @@ const UserDetailPage = ({ userState, deleteUser, updateUser, getUsers }) => {
     }
   }, []);
 
-  useEffect(() => {
-    getUsers();
-  }, []);
   const [formData, setFormData] = useState({
-    userName: userState.userName,
-    userNikName: userState.userNikName,
+    id: userState.id,
+    user_name: userState.userName,
+    user_nikname: userState.userNikName,
     email: userState.email,
-    userThumbnail: userState.userThumbnail,
+    user_thumbnail: userState.userThumbnail,
   });
 
   const handleChange = (ev) => {
@@ -136,7 +136,8 @@ const UserDetailPage = ({ userState, deleteUser, updateUser, getUsers }) => {
 
   const update1 = async () => {
     if (confirm('수정하시겠습니까?')) {
-      await updateUser(userState.id, formData);
+      await updateUser(formData);
+      await getUser(userState.id);
       navigate('/');
     } else {
       return;
@@ -145,7 +146,7 @@ const UserDetailPage = ({ userState, deleteUser, updateUser, getUsers }) => {
 
   const delete1 = async () => {
     if (confirm('정말 탈퇴하시겠습니까?')) {
-      await deleteUser(userState.id);
+      await deleteUser({ id: userState.id, status: 'N' });
       navigate('/');
     } else {
       return;
@@ -162,15 +163,15 @@ const UserDetailPage = ({ userState, deleteUser, updateUser, getUsers }) => {
 
       <DefaultDiv>
         <DefaultLabel>아이디</DefaultLabel>
-        <ReadOnly type="text" readOnly value={userState.userId} />
+        <ReadOnly type="text" readOnly value={userState.id} />
       </DefaultDiv>
 
       <DefaultDiv>
         <DefaultLabel>이름</DefaultLabel>
         <DefaultInput
           type="text"
-          name="userName"
-          value={formData.userName}
+          name="user_name"
+          value={formData.user_name}
           onChange={handleChange}
           placeholder="이름을 입력하세요."
         />
@@ -180,8 +181,8 @@ const UserDetailPage = ({ userState, deleteUser, updateUser, getUsers }) => {
         <DefaultLabel>닉네임</DefaultLabel>
         <DefaultInput
           type="text"
-          name="userNikName"
-          value={formData.userNikName}
+          name="user_nikname"
+          value={formData.user_nikname}
           onChange={handleChange}
           placeholder="닉네임을 입력하세요."
         />
@@ -202,8 +203,8 @@ const UserDetailPage = ({ userState, deleteUser, updateUser, getUsers }) => {
         <DefaultLabel>프로필사진(URL)</DefaultLabel>
         <DefaultInput
           type="text"
-          name="userThumbnail"
-          value={formData.userThumbnail}
+          name="user_thumbnail"
+          value={formData.user_thumbnail}
           onChange={handleChange}
           placeholder="프로필사진을 입력하세요.(URL)"
         />

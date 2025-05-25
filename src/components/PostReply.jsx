@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import usepostStore from '../store/PostStore';
+import PostStore from '../store/PostStore';
 
 const All = styled.div`
   width: 100%;
@@ -51,9 +51,14 @@ const DateDiv = styled.div`
 `;
 
 const PostReply = ({ param }) => {
-  const { posts } = usepostStore();
+  const { posts, getPost } = PostStore();
 
-  const post = posts.find((pos) => pos.postId === parseInt(param.postId));
+  useEffect(() => {
+    getPost();
+  }, []);
+
+  const content = posts.content;
+  const post = content.find((pos) => pos.board.no === parseInt(param.postId));
 
   const comments = post.comments;
 

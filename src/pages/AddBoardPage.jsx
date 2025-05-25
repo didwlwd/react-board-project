@@ -1,5 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
+import * as yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import PostStore from '../store/PostStore';
+import UserStore from '../store/UserStore';
+import { useNavigate } from 'react-router-dom';
 
 const Form = styled.form`
   margin: 30px auto;
@@ -110,24 +116,53 @@ const Head = styled.h2`
   margin: 5px auto;
 `;
 
+const Futer = styled.span`
+  color: green;
+`;
+
+const schema = yup.object().shape({
+  thumbnail: yup.string().required('이미지 URL을 입력해주세요.'),
+  title: yup.string().required('제목을 입력해주세요.'),
+  content: yup.string().required('내용을 입력해주세요.'),
+});
+
 const AddBoardPage = () => {
+  const navigate = useNavigate();
+  const { writeBoard } = PostStore();
+  const { userState } = UserStore();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = async (data) => {
+    await writeBoard(userState.id, data);
+    navigate('/');
+  };
+
   return (
     <>
-      <Form>
+      <Form onSubmit={handleSubmit(onSubmit)}>
         <Head>게시판 등록</Head>
         <ImageArea>
           <ImageLabel>참고 이미지</ImageLabel>
-          <InnerInput type="text" placeholder="이미지 URL을 입력해주세요." />
+          <InnerInput type="text" {...register('thumbnail')} placeholder="이미지 URL을 입력해주세요." />
         </ImageArea>
-
+        {errors.thumbnail && <Futer>{errors.thumbnail.message}</Futer>}
         <Outdiv>
           <Div>
             <Innerdiv>
-              <Title placeholder="제목을 입력해주세요."></Title>
+              <Title placeholder="제목을 입력해주세요." {...register('title')}></Title>
             </Innerdiv>
+            {errors.title && <Futer>{errors.title.message}</Futer>}
             <ContextDiv>
-              <Context placeholder="내용을 입력해주세요."></Context>
+              <Context placeholder="내용을 입력해주세요." {...register('content')}></Context>
             </ContextDiv>
+            {errors.content && <Futer>{errors.content.message}</Futer>}
           </Div>
         </Outdiv>
 

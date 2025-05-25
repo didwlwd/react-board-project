@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaBedPulse } from 'react-icons/fa6';
 
 const UserStore = create((set, get) => ({
   users: [],
@@ -10,60 +11,90 @@ const UserStore = create((set, get) => ({
 
   userState: {
     id: '',
-    userId: '',
-    password: '',
     userNikName: '',
     userName: '',
     email: '',
     userThumbnail: '',
+    status: '',
   },
 
-  getUsers: async () => {
-    const response = await axios.get('http://localhost:3001/users');
-    set({ users: response.data });
+  resetError: () => {
+    set({ error: null });
   },
 
-  checkUser: (users, formData) => {
-    const user = users.find((use) => use.userId === formData.userId);
+  getUser: async (id) => {
+    const response = await axios.get(`http://localhost:8888/users/${id}`);
+    const user = response.data;
+    set({
+      userState: {
+        id: user.id,
+        userNikName: user.user_nikname,
+        userName: user.user_name,
+        email: user.email,
+        userThumbnail: user.user_thumbnail,
+        status: user.status,
+      },
+    });
+  },
 
-    if (user && user.password === formData.password) {
+  checkUser: async (data) => {
+    try {
+      const response = await axios.post(`http://localhost:8888/users/login`, data);
+      const user = response.data;
+
+      set({ users: response.data });
       set({
         userState: {
           id: user.id,
-          userId: user.userId,
-          password: user.password,
-          userNikName: user.userNikName,
-          userName: user.userName,
+          userNikName: user.user_nikname,
+          userName: user.user_name,
           email: user.email,
-          userThumbnail: user.userThumbnail,
+          userThumbnail: user.user_thumbnail,
+          status: user.status,
         },
       });
-      set({ loginState: true });
+      set({ loginState: true, error: null });
       return true;
-    } else {
+    } catch (error) {
       set({ loginState: false });
+
+      if (error.response) {
+        const status = error.response.status;
+
+        if (status === 400) {
+          set({ error: '존재하지 않는 회원입니다.' });
+        } else if (status === 401) {
+          set({ error: '비밀번호가 일치하지 않습니다.' });
+        } else if (status === 403) {
+          set({ error: '탈퇴된 회원입니다.' });
+        } else {
+          set({ error: '서버 오류가 발생했습니다.' });
+        }
+      } else {
+        set({ error: '네트워크 오류' });
+      }
       return false;
     }
   },
 
   logOut: () => {
     set({
+      users: [],
       userState: {
         id: '',
-        userId: '',
-        password: '',
         userNikName: '',
         userName: '',
         email: '',
         userThumbnail: '',
+        status: '',
       },
       loginState: false,
     });
   },
 
-  updateUser: async (id, formData) => {
+  updateUser: async (formData) => {
     try {
-      const response = await axios.patch(`http://localhost:3001/users/${id}`, formData);
+      const response = await axios.patch(`http://localhost:8888/users/update`, formData);
       set((state) => ({
         users: state.users.map((user) => (user.id === id ? { ...user, ...response.data } : user)),
       }));
@@ -73,48 +104,35 @@ const UserStore = create((set, get) => ({
     }
   },
 
-  deleteUser: async (id) => {
+  deleteUser: async (formData) => {
     try {
-      await axios.delete(`http://localhost:3001/users/${id}`);
+      await axios.patch(`http://localhost:8888/users/delete`, formData);
 
-      set((state) => ({
-        users: state.users.filter((user) => user.id !== id),
+      set({
+        users: [],
         loginState: false,
         userState: {
           id: '',
-          userId: '',
-          password: '',
           userNikName: '',
           userName: '',
           email: '',
           userThumbnail: '',
+          status: '',
         },
-      }));
+      });
     } catch (error) {
       set({ loginState: false, error: error.message });
     }
   },
 
-  enrollUser: async (users, formData) => {
-    const newId = users.length + 1;
-    const newuser = { ...formData, id: newId };
+  enrollUser: async (formData) => {
     try {
-      const response = await axios.post(`http://localhost:3001/users`, newuser);
-      set({
-        users: response.data,
-        userState: {
-          id: newuser.id,
-          userId: newuser.userId,
-          password: newuser.password,
-          userNikName: newuser.userNikName,
-          userName: newuser.userName,
-          email: newuser.email,
-          userThumbnail: newuser.userThumbnail,
-        },
-        loginState: true,
-      });
+      await axios.post(`http://localhost:8888/users`, formData);
+
+      return true;
     } catch (error) {
       set({ error: error.message });
+      return false;
     }
   },
 }));

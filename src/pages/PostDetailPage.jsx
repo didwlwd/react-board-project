@@ -5,6 +5,7 @@ import PostReply from '../components/PostReply';
 import styled from 'styled-components';
 import usepostStore from '../store/PostStore';
 import { useParams } from 'react-router-dom';
+import PostStore from '../store/PostStore';
 
 const Main = styled.div`
   padding: 30px 300px;
@@ -107,38 +108,44 @@ const AddButtonDiv = styled.div`
 
 const PostDetailPage = () => {
   const param = useParams();
-  const { posts } = usepostStore();
+  const { posts, getPost } = PostStore();
 
-  const post = posts.find((pos) => pos.postId === parseInt(param.postId));
+  useEffect(() => {
+    getPost();
+  }, []);
 
+  const content = posts.content;
+
+  const post = content.find((pos) => pos.board_no === parseInt(param.board_no));
+  console.log(param.board_no);
   return (
     <Main>
       <Header>
-        <HeaderNikName>{post.title}</HeaderNikName>
+        <HeaderNikName>{content.title}</HeaderNikName>
         <HeaderAll>
-          <HeaderSpan>{post.userNikName}</HeaderSpan>
-          <HeaderSpan>{post.createdAt}</HeaderSpan>
-          <HeaderSpan>조회수 {post.views}</HeaderSpan>
+          <HeaderSpan>{content.user_thumbnail}</HeaderSpan>
+          <HeaderSpan>{content.create_date}</HeaderSpan>
+          <HeaderSpan>조회수 {content.views}</HeaderSpan>
         </HeaderAll>
       </Header>
 
       <ContextDiv>
-        <img src={post.thumbnail} />
-        <Context readOnly value={post.content}></Context>
+        <img src={content.thumbnail} />
+        <Context readOnly value={content.content}></Context>
       </ContextDiv>
 
       <PostLikeDiv>
         <FaRegHeart color="#7c7c7c" />
-        <span>좋아요 {post.likes}</span>
+        <span>좋아요 {content.likes}</span>
       </PostLikeDiv>
 
       <ReplyArea>
         <ReplyIconDiv>
           <MdOutlineComment color="#7c7c7c" />
-          <span>댓글 {post.comments.length}</span>
+          <span>댓글 {content.replies}</span>
         </ReplyIconDiv>
 
-        <PostReply param={param} />
+        {/* <PostReply param={param} /> */}
 
         <AddReplyForm>
           <h3>댓글 달기</h3>

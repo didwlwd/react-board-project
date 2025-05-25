@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { useNavigate } from 'react-router-dom';
 import PostList from '../components/PostList';
-import usepostStore from '../store/PostStore';
-import { PulseLoader } from 'react-spinners';
+import PostStore from '../store/PostStore';
+import UserStore from '../store/UserStore';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const PostHeader = styled.div`
   display: flex;
@@ -32,28 +34,18 @@ const All = styled.div`
   width: 600px;
 `;
 
-const Error = styled.div`
-  font-size: 30px;
-  font-weight: 700;
-`;
-
-const HomePage = ({ userState }) => {
+const HomePage = () => {
   const navigater = useNavigate();
-  const { posts, getPost, loading, error } = usepostStore();
-
-  function Loader() {
-    return <PulseLoader />;
-  }
+  const { userState } = UserStore();
+  const { getPost } = PostStore();
 
   useEffect(() => {
     getPost();
-  }, [getPost]);
-
-  if (loading && posts.length === 0) return Loader();
-  if (error) return <Error>{error}</Error>;
+  }, []);
 
   return (
     <>
+      <ToastContainer />
       <All>
         <PostHeader>
           <div></div>
@@ -61,7 +53,7 @@ const HomePage = ({ userState }) => {
           {userState.id === '' ? <div></div> : <AddPost onClick={() => navigater('/addBoard')}>게시글 작성</AddPost>}
         </PostHeader>
 
-        <PostList posts={posts} userState={userState} />
+        <PostList />
       </All>
     </>
   );

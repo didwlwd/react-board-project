@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { data, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import UserStore from '../store/UserStore';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import * as yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const Main = styled.form`
   margin: 100px auto;
@@ -109,16 +112,22 @@ const Futer = styled.span`
   color: green;
 `;
 
-const LoginPage = ({ users, getUsers, checkUser, loginState }) => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    userId: '',
-    password: '',
+const schema = yup.object().shape({
+  id: yup.string().required('아이디를 입력해주세요.'),
+  password: yup.string().min(6, '6자리 이상 입력해주세요.').required('비밀번호를 입력해주세요.'),
+});
+
+const LoginPage = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
   });
 
-  useEffect(() => {
-    getUsers();
-  }, []);
+  const { checkUser, loginState, error, resetError } = UserStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (loginState === true) {
@@ -126,14 +135,10 @@ const LoginPage = ({ users, getUsers, checkUser, loginState }) => {
     }
   }, [loginState]);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-
-    const user = users.find((use) => use.userId === formData.userId);
-
-    if (!user) {
-      toast.error('유저를 찾을 수 없습니다.', {
-        position: 'bottom-right',
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: false,
@@ -143,105 +148,39 @@ const LoginPage = ({ users, getUsers, checkUser, loginState }) => {
         theme: 'light',
         transition: Bounce,
       });
-      return;
+      resetError();
     }
+  }, [error]);
 
-    if (formData.password.length < 4) {
-      toast.error('비밀번호는 4자리 이상이여야 합니다.', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce,
-      });
-      return;
-    }
-
-    if (formData.userId === '' || formData.password === '') {
-      toast.error('아이디와 비밀번호를 입력하셔야합니다.', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce,
-      });
-      return;
-    }
-
-    if (user.password !== formData.password) {
-      toast.error('비밀번호가 다르거나 잘못입력하셨습니다.', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce,
-      });
-      return;
-    }
-
-    const result = checkUser(users, formData);
+  const onSubmit = async (data) => {
+    const result = await checkUser(data);
 
     if (result) {
       alert('로그인 성공');
       navigate('/');
-    } else {
-      alert('로그인 실패');
     }
-  };
-
-  const handleChange = (ev) => {
-    const { name, value } = ev.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   return (
     <>
       <ToastContainer />
-      <Main onSubmit={handleLogin}>
+      <Main onSubmit={handleSubmit(onSubmit)}>
         <LoginTitle>로그인</LoginTitle>
         <TextArea>
           <IdAear>
             <InnerId>
-              <InnerLable htmlFor="userId">아이디</InnerLable>
-              <InnerInput
-                id="userId"
-                type="text"
-                name="userId"
-                value={formData.userId}
-                onChange={handleChange}
-                placeholder="아이디를 입력해주세요."
-              />
+              <InnerLable htmlFor="id">아이디</InnerLable>
+              <InnerInput type="text" placeholder="아이디를 입력해주세요." {...register('id')} />
             </InnerId>
           </IdAear>
-          {formData.userId === '' ? <Futer>아이디를 입력해주셔야합니다.</Futer> : ''}
+          {errors.id && <Futer>{errors.id.message}</Futer>}
           <PasswordArea>
             <InnerPassword>
               <InnerLable htmlFor="password">비밀번호</InnerLable>
-              <InnerInput
-                id="password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="비밀번호를 입력해주세요."
-              />
+              <InnerInput type="password" placeholder="비밀번호를 입력해주세요." {...register('password')} />
             </InnerPassword>
           </PasswordArea>
+          {errors.password && <Futer>{errors.password.message}</Futer>}
         </TextArea>
 
         <FooterArea>
