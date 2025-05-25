@@ -22,7 +22,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/enroll" element={<EnrollPage />} />
           <Route path="/addBoard" element={<AddBoardPage />} />
-          <Route path="/detail/:borad_no" element={<PostDetailPage />} />
+          <Route path="/detail/:board_no" element={<PostDetailPage />} />
           <Route path="/userDetail" element={<UserDetailPage />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>

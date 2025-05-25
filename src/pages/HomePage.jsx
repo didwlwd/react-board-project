@@ -37,7 +37,7 @@ const All = styled.div`
 const HomePage = () => {
   const navigater = useNavigate();
   const { userState } = UserStore();
-  const { getPost } = PostStore();
+  const { getPost, posts } = PostStore();
 
   useEffect(() => {
     getPost();

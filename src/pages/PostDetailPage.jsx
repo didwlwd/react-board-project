@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import usepostStore from '../store/PostStore';
 import { useParams } from 'react-router-dom';
 import PostStore from '../store/PostStore';
+import { FaUserCircle } from 'react-icons/fa';
+import UserStore from '../store/UserStore';
 
 const Main = styled.div`
   padding: 30px 300px;
@@ -79,7 +81,7 @@ const ReplyIconDiv = styled.div`
   justify-content: left;
   align-items: center;
   gap: 10px;
-  padding: 10px 0;
+  padding: 10px 10px;
   border-bottom: 1px solid #eeeeee;
 `;
 
@@ -106,50 +108,81 @@ const AddButtonDiv = styled.div`
   align-items: center;
 `;
 
+const UserImg = styled.img`
+  width: 40px;
+  height: 40px;
+`;
+
+const UserIcon = styled(FaUserCircle)`
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 const PostDetailPage = () => {
   const param = useParams();
+  const [replyContent, setReplyContent] = useState({
+    reply_content: '',
+  });
   const { posts, getPost } = PostStore();
 
   useEffect(() => {
     getPost();
   }, []);
 
-  const content = posts.content;
+  const handleChange = async (ev) => {
+    const { name, value } = ev.target;
+    setReplyContent((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
+  const handleSubmit = async () => {
+    await writeReply(replyContent);
+  };
+
+  const content = posts.content;
   const post = content.find((pos) => pos.board_no === parseInt(param.board_no));
-  console.log(param.board_no);
+
   return (
     <Main>
       <Header>
-        <HeaderNikName>{content.title}</HeaderNikName>
+        <HeaderNikName>{post.title}</HeaderNikName>
         <HeaderAll>
-          <HeaderSpan>{content.user_thumbnail}</HeaderSpan>
-          <HeaderSpan>{content.create_date}</HeaderSpan>
-          <HeaderSpan>조회수 {content.views}</HeaderSpan>
+          <HeaderSpan>
+            <UserImg src={post.user_thumbnail === null ? <UserIcon /> : post.user_thumbnail} alt="회원사진" />
+          </HeaderSpan>
+          <HeaderSpan>{post.create_date}</HeaderSpan>
+          <HeaderSpan>조회수 {post.views}</HeaderSpan>
         </HeaderAll>
       </Header>
 
       <ContextDiv>
-        <img src={content.thumbnail} />
-        <Context readOnly value={content.content}></Context>
+        <img src={post.thumbnail} />
+        <Context readOnly value={post.content}></Context>
       </ContextDiv>
 
       <PostLikeDiv>
         <FaRegHeart color="#7c7c7c" />
-        <span>좋아요 {content.likes}</span>
+        <span>좋아요 {post.likes}</span>
       </PostLikeDiv>
 
       <ReplyArea>
         <ReplyIconDiv>
           <MdOutlineComment color="#7c7c7c" />
-          <span>댓글 {content.replies}</span>
+          <span>댓글 {post.replies}</span>
         </ReplyIconDiv>
 
         {/* <PostReply param={param} /> */}
 
-        <AddReplyForm>
+        <AddReplyForm onSubmit={handleSubmit}>
           <h3>댓글 달기</h3>
-          <AddReply placeholder="입력해주세요"></AddReply>
+          <AddReply id="reply_content" name="reply_content" placeholder="입력해주세요" onChange={handleChange}>
+            {replyContent}
+          </AddReply>
           <AddButtonDiv>
             <button type="submit">등록하기</button>
           </AddButtonDiv>

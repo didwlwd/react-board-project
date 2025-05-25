@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import PostStore from '../store/PostStore';
 import UserStore from '../store/UserStore';
 import { PulseLoader } from 'react-spinners';
+import { FaUserCircle } from 'react-icons/fa';
+import { MdInsertPhoto } from 'react-icons/md';
 
 const Main = styled.div`
   display: flex;
@@ -65,6 +67,15 @@ const Error = styled.div`
   font-size: 30px;
   font-weight: 700;
 `;
+
+const UserIcon = styled(FaUserCircle)`
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 const PostList = () => {
   const { userState } = UserStore();
   const { posts, loading, error, getPost } = PostStore();
@@ -72,7 +83,7 @@ const PostList = () => {
     getPost();
   }, []);
 
-  const content1 = posts.content;
+  const content = posts.content;
 
   const navigater = useNavigate();
 
@@ -82,15 +93,14 @@ const PostList = () => {
 
   if (loading && posts.length === 0) return Loader();
   if (error) return <Error>{error}</Error>;
-  if (!posts || !posts.content) return null;
 
   return (
     <>
-      {content1.map((post) => (
+      {content.map((post) => (
         <Main key={post.board_no} onClick={() => navigater(`/detail/${post.board_no}`)}>
           <Content>
             <div>
-              <ProfileImg src={userState === '' ? '' : post.user_thumbnail} alt="프로필사진" />
+              <ProfileImg src={post.user_thumbnail === null ? <UserIcon /> : post.user_thumbnail} alt="프로필사진" />
               <UserNikName>{post.user_nikname}</UserNikName>
             </div>
             <h3>{post.title}</h3>
@@ -104,7 +114,7 @@ const PostList = () => {
             </PostFuter>
           </Content>
 
-          <WriterPoto src={post.thumbnail} alt="글 사진" />
+          <WriterPoto src={post.thumbnail === null ? <MdInsertPhoto /> : post.thumbnail} alt="글 사진" />
         </Main>
       ))}
     </>

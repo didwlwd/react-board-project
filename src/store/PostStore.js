@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { data } from 'react-router-dom';
 import { create } from 'zustand';
 
 const usepostStore = create((set) => ({
@@ -35,6 +36,12 @@ const usepostStore = create((set) => ({
     } catch (error) {
       set({ loading: false, error: error.message });
     }
+  },
+
+  writeReply: async (data) => {
+    try {
+      await axios.post('http://localhost:8888/boards/reply', data);
+    } catch (error) {}
   },
 }));
 
