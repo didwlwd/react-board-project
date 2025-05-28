@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import PostStore from '../store/PostStore';
+import UserStore from '../store/UserStore';
 
 const All = styled.div`
   width: 100%;
@@ -51,28 +52,23 @@ const DateDiv = styled.div`
 `;
 
 const PostReply = ({ param }) => {
-  const { posts, getPost } = PostStore();
+  const { replies, getReply } = PostStore();
 
   useEffect(() => {
-    getPost();
+    getReply(param.board_no);
   }, []);
-
-  const content = posts.content;
-  const post = content.find((pos) => pos.board.no === parseInt(param.postId));
-
-  const comments = post.comments;
 
   return (
     <>
-      {comments.map((comment) => (
-        <All>
+      {replies.map((reply) => (
+        <All key={reply.reply_id}>
           <Main>
-            <Img src={comment.userThumbnail} alt="프로필사진" />
+            <Img src={reply.userThumbnail} alt="프로필사진" />
             <ReplyArea>
-              <NikName>{comment.userNikName}</NikName>
-              <Reply readOnly defaultValue={comment.content}></Reply>
+              <NikName>{reply.userNikName}</NikName>
+              <Reply readOnly defaultValue={reply.replyContent}></Reply>
               <DateDiv>
-                <span>{comment.createdAt}</span>
+                <span>{reply.create_date}</span>
               </DateDiv>
             </ReplyArea>
           </Main>

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import PostList from '../components/PostList';
 import PostStore from '../store/PostStore';
 import UserStore from '../store/UserStore';
+import { PulseLoader } from 'react-spinners';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -37,11 +38,17 @@ const All = styled.div`
 const HomePage = () => {
   const navigater = useNavigate();
   const { userState } = UserStore();
-  const { getPost, posts } = PostStore();
+  const { getPostList, posts, loading, error } = PostStore();
 
   useEffect(() => {
-    getPost();
+    getPostList();
   }, []);
+
+  function Loader() {
+    return <PulseLoader />;
+  }
+
+  if (loading && posts.length === 0) return Loader();
 
   return (
     <>

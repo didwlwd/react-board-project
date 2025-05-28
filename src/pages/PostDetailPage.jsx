@@ -3,11 +3,13 @@ import { FaRegHeart } from 'react-icons/fa6';
 import { MdOutlineComment } from 'react-icons/md';
 import PostReply from '../components/PostReply';
 import styled from 'styled-components';
-import usepostStore from '../store/PostStore';
+
 import { useParams } from 'react-router-dom';
 import PostStore from '../store/PostStore';
 import { FaUserCircle } from 'react-icons/fa';
 import UserStore from '../store/UserStore';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Main = styled.div`
   padding: 30px 300px;
@@ -90,14 +92,15 @@ const AddReplyForm = styled.form`
   padding: 10px 0;
 `;
 
-const AddReply = styled.textarea`
+const AddReply = styled.input`
   width: 100%;
-  height: 80px;
+  height: 100px;
   padding: 10px 30px;
+  margin-bottom: 10px;
   outline: none;
   border: 1px solid #eeeeee;
   resize: none;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: #575757;
 `;
@@ -123,72 +126,78 @@ const UserIcon = styled(FaUserCircle)`
 
 const PostDetailPage = () => {
   const param = useParams();
-  const [replyContent, setReplyContent] = useState({
-    reply_content: '',
-  });
-  const { posts, getPost } = PostStore();
+  const [replyContent, setReplyContent] = useState('');
+  const { post, getPost, replies, getReply } = PostStore();
+  const { userState } = UserStore();
 
   useEffect(() => {
-    getPost();
+    getReply(param.board_no);
+    getPost(param.board_no);
   }, []);
 
   const handleChange = async (ev) => {
-    const { name, value } = ev.target;
-    setReplyContent((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { value } = ev.target;
+    setReplyContent(value);
   };
 
   const handleSubmit = async () => {
-    await writeReply(replyContent);
+    if (userState.id === '') {
+      alert('로그인 하셔야 사용하 실 수 있습니다.');
+      return;
+    } else {
+      await writeReply(userState.id, param.board_no, replyContent);
+    }
   };
 
-  const content = posts.content;
-  const post = content.find((pos) => pos.board_no === parseInt(param.board_no));
-
   return (
-    <Main>
-      <Header>
-        <HeaderNikName>{post.title}</HeaderNikName>
-        <HeaderAll>
-          <HeaderSpan>
-            <UserImg src={post.user_thumbnail === null ? <UserIcon /> : post.user_thumbnail} alt="회원사진" />
-          </HeaderSpan>
-          <HeaderSpan>{post.create_date}</HeaderSpan>
-          <HeaderSpan>조회수 {post.views}</HeaderSpan>
-        </HeaderAll>
-      </Header>
+    <>
+      <ToastContainer />
+      <Main>
+        <Header>
+          <HeaderNikName>{post.title}</HeaderNikName>
+          <HeaderAll>
+            <HeaderSpan>
+              <UserImg src={post.user_thumbnail === '' ? <UserIcon /> : post.user_thumbnail} alt="회원사진" />
+            </HeaderSpan>
+            <HeaderSpan>{post.create_date}</HeaderSpan>
+            <HeaderSpan>조회수 {post.views}</HeaderSpan>
+          </HeaderAll>
+        </Header>
 
-      <ContextDiv>
-        <img src={post.thumbnail} />
-        <Context readOnly value={post.content}></Context>
-      </ContextDiv>
+        <ContextDiv>
+          <img src={post.thumbnail === '' ? <UserIcon /> : post.thumbnail} />
+          <Context readOnly value={post.content}></Context>
+        </ContextDiv>
 
-      <PostLikeDiv>
-        <FaRegHeart color="#7c7c7c" />
-        <span>좋아요 {post.likes}</span>
-      </PostLikeDiv>
+        <PostLikeDiv>
+          <FaRegHeart color="#7c7c7c" />
+          <span>좋아요 {post.likes}</span>
+        </PostLikeDiv>
 
-      <ReplyArea>
-        <ReplyIconDiv>
-          <MdOutlineComment color="#7c7c7c" />
-          <span>댓글 {post.replies}</span>
-        </ReplyIconDiv>
+        <ReplyArea>
+          <ReplyIconDiv>
+            <MdOutlineComment color="#7c7c7c" />
+            <span>댓글 {replies.length}</span>
+          </ReplyIconDiv>
 
-        {/* <PostReply param={param} /> */}
+          <PostReply param={param} />
 
-        <AddReplyForm onSubmit={handleSubmit}>
-          <h3>댓글 달기</h3>
-          <AddReply id="reply_content" name="reply_content" placeholder="입력해주세요" onChange={handleChange}>
-            {replyContent}
-          </AddReply>
-          <AddButtonDiv>
-            <button type="submit">등록하기</button>
-          </AddButtonDiv>
-        </AddReplyForm>
-      </ReplyArea>
-    </Main>
+          <AddReplyForm onSubmit={handleSubmit}>
+            <h3>댓글 달기</h3>
+            <AddReply
+              id="reply_content"
+              name="reply_content"
+              placeholder="입력해주세요"
+              onChange={handleChange}
+              value={replyContent}
+            />
+            <AddButtonDiv>
+              <button type="submit">등록하기</button>
+            </AddButtonDiv>
+          </AddReplyForm>
+        </ReplyArea>
+      </Main>
+    </>
   );
 };
 

@@ -14,11 +14,36 @@ const usepostStore = create((set) => ({
   loading: false,
   error: null,
 
-  getPost: async () => {
+  post: {
+    board_no: '',
+    title: '',
+    content: '',
+    thumbnail: '',
+    create_date: '',
+    modify_date: '',
+    views: '',
+    likes: '',
+    user_thumbnail: '',
+    user_nikname: '',
+  },
+
+  replies: [],
+
+  getPostList: async () => {
     set({ loading: true, error: null });
     try {
       const response = await axios.get('http://localhost:8888/boards');
       set({ posts: response.data, loading: false });
+    } catch (error) {
+      set({ loading: false, error: error.message });
+    }
+  },
+
+  getPost: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.get(`http://localhost:8888/boards/${id}`);
+      set({ post: response.data, loading: false });
     } catch (error) {
       set({ loading: false, error: error.message });
     }
@@ -38,10 +63,27 @@ const usepostStore = create((set) => ({
     }
   },
 
-  writeReply: async (data) => {
+  //댓글
+
+  getReply: async (boardNo) => {
+    set({ loading: true, error: null });
     try {
-      await axios.post('http://localhost:8888/boards/reply', data);
-    } catch (error) {}
+      const response = await axios.get(`http://localhost:8888/reply/${boardNo}`);
+      set({ replies: response.data, loading: false });
+    } catch (error) {
+      set({ loading: false, error: error.message });
+    }
+  },
+
+  writeReply: async (user_id, board_no, content) => {
+    const data = { id: user_id, boardNo: board_no, content: content };
+    set({ loading: true, error: null });
+    try {
+      await axios.post('http://localhost:8888/reply', data);
+      set({ loading: false });
+    } catch (error) {
+      set({ loading: false, error: error.message });
+    }
   },
 }));
 
